@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WHALE HUNTER — Coffin Cabal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=JetBrains+Mono:wght@300;400;500;600&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #05020a;
+  --surface:    #0a0610;
+  --card:       #0c0812;
+  --border:     #1e1228;
+  --border2:    #2a1a38;
+  --text:       #e8ddf5;
+  --dim:        #9880b8;
+  --muted:      #3d2850;
+  --blood:      #cc1a2e;
+  --blood-glow: rgba(204,26,46,0.22);
+  --blood-soft: rgba(204,26,46,0.08);
+  --crimson:    #ff2442;
+  --bull:       #cc1a2e;
+  --bull-glow:  rgba(204,26,46,0.22);
+  --bull-soft:  rgba(204,26,46,0.08);
+  --bear:       #6b21d4;
+  --bear-glow:  rgba(107,33,212,0.22);
+  --bear-soft:  rgba(107,33,212,0.08);
+  --gold:       #c9a84c;
+  --silver:     #a89bc0;
+  --accent:     #8b3dff;
+  --font:       'Cinzel', serif;
+  --deco:       'Cinzel Decorative', serif;
+  --mono:       'JetBrains Mono', monospace;
+}
+
+::selection { background: var(--blood-glow); color: var(--text); }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(100,10,20,0.35) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 10% 100%, rgba(50,5,80,0.3) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 30% at 90% 100%, rgba(80,5,20,0.2) 0%, transparent 60%);
+}
+
+/* SCANLINES */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 6px);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* SPIDERWEB CORNERS — SVG inline via canvas */
+.cobweb {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9997;
+  opacity: 0.55;
+}
+.cobweb-tl { top: 0; left: 0; }
+.cobweb-tr { top: 0; right: 0; transform: scaleX(-1); }
+.cobweb-bl { bottom: 0; left: 0; transform: scaleY(-1); }
+.cobweb-br { bottom: 0; right: 0; transform: scale(-1,-1); }
+
+/* DRIP effect top */
+.blood-drip {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(to right, transparent 5%, var(--blood) 20%, var(--crimson) 50%, var(--blood) 80%, transparent 95%);
+  z-index: 10000;
+  box-shadow: 0 0 18px var(--blood-glow), 0 0 40px rgba(204,26,46,0.1);
+}
+
+/* HEADER */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px 14px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(5,2,10,0.96);
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(16px);
+}
+
+.logo {
+  display: flex; align-items: center; gap: 16px;
+}
+
+.logo-mark {
+  width: 42px; height: 42px;
+  border: 1.5px solid var(--blood);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 0 20px var(--blood-glow), inset 0 0 20px var(--blood-soft);
+  animation: cryptPulse 4s ease-in-out infinite;
+  background: var(--blood-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.logo-mark::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+}
+
+@keyframes cryptPulse {
+  0%,100% { box-shadow: 0 0 20px var(--blood-glow), inset 0 0 20px var(--blood-soft); }
+  50%      { box-shadow: 0 0 36px var(--blood-glow), inset 0 0 28px rgba(204,26,46,0.14); }
+}
+
+.logo-text {
+  display: flex; flex-direction: column; gap: 1px;
+}
+
+.logo-title {
+  font-family: var(--deco);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--text);
+  line-height: 1;
+  text-shadow: 0 0 30px rgba(204,26,46,0.4);
+}
+
+.logo-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.header-stats {
+  display: flex; gap: 28px; align-items: center;
+}
+
+.hstat { text-align: center; }
+
+.hstat-val {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.hstat-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+.header-right {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.live-pill {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 14px;
+  border: 1px solid rgba(204,26,46,0.35);
+  border-radius: 4px;
+  background: var(--blood-soft);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--crimson);
+  letter-spacing: 2px;
+}
+
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--crimson);
+  animation: drainPulse 1.6s ease-in-out infinite;
+  box-shadow: 0 0 8px var(--crimson);
+}
+
+@keyframes drainPulse {
+  0%,100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.4); opacity: 0.6; }
+}
+
+.refresh-btn {
+  padding: 7px 16px;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.refresh-btn:hover { border-color: var(--blood); color: var(--crimson); box-shadow: 0 0 12px var(--blood-glow); }
+.refresh-btn.spinning { animation: spin 0.7s linear; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* SENTIMENT BAR */
+.sentiment-banner {
+  padding: 10px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 20px;
+  background: rgba(10,6,16,0.8);
+}
+
+.sent-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sent-track {
+  flex: 1;
+  height: 5px;
+  background: var(--border2);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.sent-fill-bull {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--blood), rgba(204,26,46,0.5));
+  transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+
+.sent-fill-bear {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  border-radius: 2px;
+  background: linear-gradient(to left, var(--bear), rgba(107,33,212,0.5));
+  transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+
+.sent-counts {
+  display: flex; gap: 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.sc-bull    { color: var(--crimson); font-weight: 500; }
+.sc-bear    { color: #9b59ff; font-weight: 500; }
+.sc-neutral { color: var(--muted); }
+
+/* CONTROLS */
+.controls {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-wrap: wrap;
+}
+
+.ctrl-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-right: 2px;
+}
+
+.ctrl-btn {
+  padding: 5px 12px;
+  border-radius: 3px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+.ctrl-btn:hover { border-color: var(--dim); color: var(--dim); }
+.ctrl-btn.active { border-color: var(--blood); color: var(--crimson); background: var(--blood-soft); }
+
+.ctrl-divider { width: 1px; height: 18px; background: var(--border2); margin: 0 4px; }
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  padding-bottom: 48px;
+}
+
+/* WALLET CARD */
+.wallet-card {
+  background: var(--card);
+  position: relative;
+  overflow: hidden;
+  animation: cryptIn 0.5s ease-out both;
+  transition: background 0.2s;
+}
+
+@keyframes cryptIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* top accent line */
+.wallet-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--muted);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.wallet-card.bull::before {
+  background: linear-gradient(to right, var(--blood), var(--crimson), transparent);
+  box-shadow: 0 0 12px var(--blood-glow);
+}
+
+.wallet-card.bear::before {
+  background: linear-gradient(to right, var(--bear), #9b59ff, transparent);
+  box-shadow: 0 0 12px var(--bear-glow);
+}
+
+.wallet-card:hover { background: #100c18; }
+
+/* subtle inner glow on hover */
+.wallet-card.bull:hover  { box-shadow: inset 0 0 50px rgba(204,26,46,0.04); }
+.wallet-card.bear:hover  { box-shadow: inset 0 0 50px rgba(107,33,212,0.04); }
+
+/* CARD HEADER */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.wallet-id {
+  display: flex; align-items: center; gap: 10px;
+}
+
+.wallet-num {
+  width: 28px; height: 28px;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--border2);
+  color: var(--dim);
+  flex-shrink: 0;
+  font-family: var(--deco);
+}
+
+.wallet-card.bull .wallet-num { background: var(--blood-soft); color: var(--crimson); border: 1px solid rgba(204,26,46,0.25); }
+.wallet-card.bear .wallet-num { background: var(--bear-soft);  color: #9b59ff;        border: 1px solid rgba(107,33,212,0.25); }
+
+.wallet-name {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 1px;
+}
+
+.wallet-addr {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 1px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.wallet-addr:hover { color: var(--dim); }
+
+.side-badge {
+  padding: 4px 12px;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.side-badge.bull    { background: var(--blood-soft); color: var(--crimson); border: 1px solid rgba(204,26,46,0.3); }
+.side-badge.bear    { background: var(--bear-soft);  color: #9b59ff;        border: 1px solid rgba(107,33,212,0.3); }
+.side-badge.neutral { background: var(--border);     color: var(--muted);   border: 1px solid var(--border2); }
+
+/* POSITIONS */
+.positions-list { padding: 10px 14px 14px; }
+
+.no-pos {
+  padding: 18px 0;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+}
+
+.pos-row {
+  display: grid;
+  grid-template-columns: 22px 56px 1fr 1fr 80px;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.pos-row::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+}
+
+.pos-row.long::after  { background: var(--blood); box-shadow: 2px 0 8px var(--blood-glow); }
+.pos-row.short::after { background: var(--bear);  box-shadow: 2px 0 8px var(--bear-glow); }
+
+.pos-row:hover { border-color: var(--border2); background: #130e1c; }
+
+.pos-side-icon {
+  font-size: 12px;
+  text-align: center;
+  opacity: 0.9;
+}
+
+.pos-coin {
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.pos-row.long  .pos-coin { color: var(--crimson); }
+.pos-row.short .pos-coin { color: #9b59ff; }
+
+.pos-meta {
+  display: flex; flex-direction: column; gap: 3px;
+}
+
+.pos-size {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--dim);
+}
+
+.pos-age {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  display: flex; align-items: center; gap: 3px;
+}
+
+.pos-entry {
+  display: flex; flex-direction: column; gap: 2px;
+}
+
+.pos-entry-val {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+}
+
+.pos-entry-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.pos-pnl {
+  text-align: right;
+  display: flex; flex-direction: column; gap: 2px;
+  align-items: flex-end;
+}
+
+.pos-pnl-val {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.pos-pnl-val.green { color: var(--crimson); }
+.pos-pnl-val.red   { color: #9b59ff; }
+
+.pos-lev {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  background: var(--border2);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
+/* CARD FOOTER */
+.card-footer {
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.total-pnl {
+  font-family: var(--mono);
+  font-size: 11px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.total-pnl-label {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.total-pnl-val { font-weight: 600; }
+.total-pnl-val.green { color: var(--crimson); }
+.total-pnl-val.red   { color: #9b59ff; }
+
+.hl-link {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  transition: color 0.15s;
+  display: flex; align-items: center; gap: 4px;
+}
+.hl-link:hover { color: var(--accent); }
+
+/* LOADING */
+.loading-card {
+  background: var(--card);
+  padding: 24px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  animation: cryptIn 0.3s ease-out both;
+}
+
+.skeleton {
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--border) 25%, var(--border2) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* ERROR */
+.error-card {
+  padding: 24px 16px;
+  display: flex; flex-direction: column; gap: 6px;
+  align-items: center; justify-content: center;
+}
+.error-msg {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* BOTTOM BAR */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(5,2,10,0.97);
+  border-top: 1px solid var(--border);
+  padding: 8px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  backdrop-filter: blur(16px);
+  z-index: 100;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.bottom-ticker { display: flex; gap: 20px; align-items: center; }
+.ticker-item   { display: flex; gap: 6px; }
+.ticker-key    { color: var(--muted); letter-spacing: 1px; }
+.ticker-val    { color: var(--dim); }
+
+.update-status { display: flex; align-items: center; gap: 6px; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* NEW TRADE FLASH */
+@keyframes bloodFlash {
+  0%   { background: rgba(204,26,46,0.1); }
+  100% { background: var(--card); }
+}
+.new-trade { animation: bloodFlash 2.5s ease-out forwards; }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  header { padding: 12px 14px; }
+  .header-stats { display: none; }
+  .grid { grid-template-columns: 1fr; }
+  .controls, .sentiment-banner { padding: 8px 14px; gap: 8px; }
+  .logo-title { font-size: 15px; }
+}
+
+/* STAGGER */
+.wallet-card:nth-child(1)  { animation-delay: 0.03s }
+.wallet-card:nth-child(2)  { animation-delay: 0.06s }
+.wallet-card:nth-child(3)  { animation-delay: 0.09s }
+.wallet-card:nth-child(4)  { animation-delay: 0.12s }
+.wallet-card:nth-child(5)  { animation-delay: 0.15s }
+.wallet-card:nth-child(6)  { animation-delay: 0.18s }
+.wallet-card:nth-child(7)  { animation-delay: 0.21s }
+.wallet-card:nth-child(8)  { animation-delay: 0.24s }
+.wallet-card:nth-child(9)  { animation-delay: 0.27s }
+.wallet-card:nth-child(10) { animation-delay: 0.30s }
+.wallet-card:nth-child(11) { animation-delay: 0.33s }
+</style>
+</head>
+<body>
+
+<!-- BLOOD DRIP LINE -->
+<div class="blood-drip"></div>
+
+<!-- SPIDERWEBS -->
+<svg class="cobweb cobweb-tl" width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- radial lines from corner -->
+  <line x1="0" y1="0" x2="220" y2="0"   stroke="#4a1a5a" stroke-width="0.6" opacity="0.7"/>
+  <line x1="0" y1="0" x2="200" y2="40"  stroke="#4a1a5a" stroke-width="0.5" opacity="0.6"/>
+  <line x1="0" y1="0" x2="170" y2="80"  stroke="#4a1a5a" stroke-width="0.5" opacity="0.6"/>
+  <line x1="0" y1="0" x2="130" y2="120" stroke="#4a1a5a" stroke-width="0.5" opacity="0.5"/>
+  <line x1="0" y1="0" x2="80"  y2="160" stroke="#4a1a5a" stroke-width="0.5" opacity="0.5"/>
+  <line x1="0" y1="0" x2="30"  y2="200" stroke="#4a1a5a" stroke-width="0.5" opacity="0.5"/>
+  <line x1="0" y1="0" x2="0"   y2="220" stroke="#4a1a5a" stroke-width="0.6" opacity="0.7"/>
+  <!-- concentric arcs -->
+  <path d="M 36 0 Q 18 18 0 36"   stroke="#4a1a5a" stroke-width="0.7" fill="none" opacity="0.8"/>
+  <path d="M 70 0 Q 35 35 0 70"   stroke="#4a1a5a" stroke-width="0.6" fill="none" opacity="0.7"/>
+  <path d="M 108 0 Q 54 54 0 108" stroke="#4a1a5a" stroke-width="0.6" fill="none" opacity="0.65"/>
+  <path d="M 148 0 Q 74 74 0 148" stroke="#3a1040" stroke-width="0.5" fill="none" opacity="0.55"/>
+  <path d="M 190 0 Q 95 95 0 190" stroke="#3a1040" stroke-width="0.5" fill="none" opacity="0.45"/>
+  <!-- extra detail threads -->
+  <line x1="0" y1="0" x2="110" y2="20"  stroke="#4a1a5a" stroke-width="0.3" opacity="0.4"/>
+  <line x1="0" y1="0" x2="20"  y2="110" stroke="#4a1a5a" stroke-width="0.3" opacity="0.4"/>
+  <line x1="0" y1="0" x2="150" y2="60"  stroke="#4a1a5a" stroke-width="0.3" opacity="0.4"/>
+  <line x1="0" y1="0" x2="60"  y2="150" stroke="#4a1a5a" stroke-width="0.3" opacity="0.4"/>
+  <!-- tiny spider -->
+  <circle cx="88" cy="38" r="3.5" fill="#2a0a30" stroke="#6b2080" stroke-width="0.8"/>
+  <line x1="85" y1="36" x2="80" y2="30" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="91" y1="36" x2="96" y2="30" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="84" y1="39" x2="78" y2="41" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="92" y1="39" x2="98" y2="41" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="85" y1="41" x2="80" y2="46" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="91" y1="41" x2="96" y2="46" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="88" y1="41" x2="88" y2="48" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="88" y1="36" x2="88" y2="28" stroke="#4a1a5a" stroke-width="0.5"/>
+</svg>
+
+<svg class="cobweb cobweb-tr" width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="0" x2="220" y2="0"   stroke="#4a1a5a" stroke-width="0.6" opacity="0.7"/>
+  <line x1="0" y1="0" x2="200" y2="40"  stroke="#4a1a5a" stroke-width="0.5" opacity="0.6"/>
+  <line x1="0" y1="0" x2="170" y2="80"  stroke="#4a1a5a" stroke-width="0.5" opacity="0.6"/>
+  <line x1="0" y1="0" x2="130" y2="120" stroke="#4a1a5a" stroke-width="0.5" opacity="0.5"/>
+  <line x1="0" y1="0" x2="80"  y2="160" stroke="#4a1a5a" stroke-width="0.5" opacity="0.5"/>
+  <line x1="0" y1="0" x2="30"  y2="200" stroke="#4a1a5a" stroke-width="0.5" opacity="0.5"/>
+  <line x1="0" y1="0" x2="0"   y2="220" stroke="#4a1a5a" stroke-width="0.6" opacity="0.7"/>
+  <path d="M 36 0 Q 18 18 0 36"   stroke="#4a1a5a" stroke-width="0.7" fill="none" opacity="0.8"/>
+  <path d="M 70 0 Q 35 35 0 70"   stroke="#4a1a5a" stroke-width="0.6" fill="none" opacity="0.7"/>
+  <path d="M 108 0 Q 54 54 0 108" stroke="#4a1a5a" stroke-width="0.6" fill="none" opacity="0.65"/>
+  <path d="M 148 0 Q 74 74 0 148" stroke="#3a1040" stroke-width="0.5" fill="none" opacity="0.55"/>
+  <path d="M 190 0 Q 95 95 0 190" stroke="#3a1040" stroke-width="0.5" fill="none" opacity="0.45"/>
+  <line x1="0" y1="0" x2="110" y2="20"  stroke="#4a1a5a" stroke-width="0.3" opacity="0.4"/>
+  <line x1="0" y1="0" x2="20"  y2="110" stroke="#4a1a5a" stroke-width="0.3" opacity="0.4"/>
+  <circle cx="88" cy="38" r="3.5" fill="#2a0a30" stroke="#6b2080" stroke-width="0.8"/>
+  <line x1="85" y1="36" x2="80" y2="30" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="91" y1="36" x2="96" y2="30" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="84" y1="39" x2="78" y2="41" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="92" y1="39" x2="98" y2="41" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="85" y1="41" x2="80" y2="46" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="91" y1="41" x2="96" y2="46" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="88" y1="41" x2="88" y2="48" stroke="#4a1a5a" stroke-width="0.5"/>
+  <line x1="88" y1="36" x2="88" y2="28" stroke="#4a1a5a" stroke-width="0.5"/>
+</svg>
+
+<svg class="cobweb cobweb-bl" width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="160" x2="160" y2="160" stroke="#3a1040" stroke-width="0.5" opacity="0.5"/>
+  <line x1="0" y1="160" x2="140" y2="120" stroke="#3a1040" stroke-width="0.4" opacity="0.4"/>
+  <line x1="0" y1="160" x2="100" y2="80"  stroke="#3a1040" stroke-width="0.4" opacity="0.4"/>
+  <line x1="0" y1="160" x2="50"  y2="30"  stroke="#3a1040" stroke-width="0.4" opacity="0.4"/>
+  <line x1="0" y1="160" x2="0"   y2="0"   stroke="#3a1040" stroke-width="0.5" opacity="0.5"/>
+  <path d="M 30 160 Q 15 145 0 130" stroke="#3a1040" stroke-width="0.5" fill="none" opacity="0.6"/>
+  <path d="M 65 160 Q 32 128 0 95"  stroke="#3a1040" stroke-width="0.4" fill="none" opacity="0.5"/>
+  <path d="M 105 160 Q 52 108 0 55" stroke="#3a1040" stroke-width="0.4" fill="none" opacity="0.4"/>
+</svg>
+
+<svg class="cobweb cobweb-br" width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <line x1="0" y1="160" x2="160" y2="160" stroke="#3a1040" stroke-width="0.5" opacity="0.5"/>
+  <line x1="0" y1="160" x2="140" y2="120" stroke="#3a1040" stroke-width="0.4" opacity="0.4"/>
+  <line x1="0" y1="160" x2="100" y2="80"  stroke="#3a1040" stroke-width="0.4" opacity="0.4"/>
+  <line x1="0" y1="160" x2="50"  y2="30"  stroke="#3a1040" stroke-width="0.4" opacity="0.4"/>
+  <line x1="0" y1="160" x2="0"   y2="0"   stroke="#3a1040" stroke-width="0.5" opacity="0.5"/>
+  <path d="M 30 160 Q 15 145 0 130" stroke="#3a1040" stroke-width="0.5" fill="none" opacity="0.6"/>
+  <path d="M 65 160 Q 32 128 0 95"  stroke="#3a1040" stroke-width="0.4" fill="none" opacity="0.5"/>
+  <path d="M 105 160 Q 52 108 0 55" stroke="#3a1040" stroke-width="0.4" fill="none" opacity="0.4"/>
+</svg>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-mark">🦇</div>
+    <div class="logo-text">
+      <div class="logo-title">WHALE HUNTER</div>
+      <div class="logo-sub">Coffin Cabal · Hyperliquid Perps</div>
+    </div>
+  </div>
+
+  <div class="header-stats">
+    <div class="hstat">
+      <div class="hstat-val" id="hBull" style="color:var(--crimson)">—</div>
+      <div class="hstat-label">Feeding</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-val" id="hBear" style="color:#9b59ff">—</div>
+      <div class="hstat-label">Shorting</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-val" id="hPositions" style="color:var(--dim)">—</div>
+      <div class="hstat-label">Open Crypts</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-val" id="hTotalPnl" style="color:var(--dim)">—</div>
+      <div class="hstat-label">Blood Money</div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="live-pill"><div class="live-dot"></div>HUNTING</div>
+    <button class="refresh-btn" id="refreshBtn" onclick="fetchAll()">↻ FEED</button>
+  </div>
+</header>
+
+<!-- SENTIMENT -->
+<div class="sentiment-banner">
+  <span class="sent-label">⚰ Coven Bias</span>
+  <div class="sent-track">
+    <div class="sent-fill-bull" id="sentBull" style="width:0%"></div>
+    <div class="sent-fill-bear" id="sentBear" style="width:0%"></div>
+  </div>
+  <div class="sent-counts">
+    <span class="sc-bull" id="scBull">— LONG</span>
+    <span class="sc-bear" id="scBear">— SHORT</span>
+    <span class="sc-neutral" id="scNeutral">— DORMANT</span>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <span class="ctrl-label">Sort</span>
+  <button class="ctrl-btn active" onclick="setSort('bias')"      id="sortBias">By Bias</button>
+  <button class="ctrl-btn"        onclick="setSort('pnl')"       id="sortPnl">By Blood</button>
+  <button class="ctrl-btn"        onclick="setSort('positions')" id="sortPositions">By Positions</button>
+  <div class="ctrl-divider"></div>
+  <span class="ctrl-label">Filter</span>
+  <button class="ctrl-btn active" onclick="setFilter('all')"  id="filterAll">All</button>
+  <button class="ctrl-btn"        onclick="setFilter('bull')" id="filterBull">🩸 Long</button>
+  <button class="ctrl-btn"        onclick="setFilter('bear')" id="filterBear">🔮 Short</button>
+</div>
+
+<!-- GRID -->
+<div class="grid" id="grid"></div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bottom-ticker">
+    <div class="ticker-item"><span class="ticker-key">HUNTERS</span><span class="ticker-val">11</span></div>
+    <div class="ticker-item"><span class="ticker-key">CHAIN</span><span class="ticker-val" style="color:var(--crimson)">HYPERLIQUID</span></div>
+    <div class="ticker-item"><span class="ticker-key">🦇</span><span class="ticker-val">COFFIN CABAL</span></div>
+  </div>
+  <div class="update-status">
+    <div class="live-dot" style="width:5px;height:5px;"></div>
+    <span id="lastUpdate">Awakening...</span>
+    <span style="color:var(--border2)">|</span>
+    <span>Next feed in <span id="nextRefresh" style="color:var(--dim)">30s</span></span>
+  </div>
+</div>
+
+<script>
+const WALLETS = [
+  { address: '0xa1830e8d9f019feb448478a171bb37cc6c4c0482', label: 'Hunter I' },
+  { address: '0x20c2d95a3dfdca9e9ad12794d5fa6fad99da44f5', label: 'Hunter II' },
+  { address: '0x35d1151ef1aab579cbb3109e69fa82f94ff5acb1', label: 'Hunter III' },
+  { address: '0xcac19662ec88d23fa1c81ac0e8570b0cf2ff26b3', label: 'Hunter IV' },
+  { address: '0x69794e173b4b22e06f5e7a102bdb4f38fcac377e', label: 'Hunter V' },
+  { address: '0xc63f7e5fb9b9be708035e94bbaac56c755fb34dd', label: 'Hunter VI' },
+  { address: '0xa87a233e8a7d8951ff790a2e39738086cb5f71b7', label: 'Hunter VII' },
+  { address: '0x15271757b398cd1d3d7cca05c4f7b0c159afa7c2', label: 'Hunter VIII' },
+  { address: '0x6979dde2781dc4ec843641b10b2a2f2e0f4bda62', label: 'Hunter IX' },
+  { address: '0xae6b807ec47e0b7900d1fe2a53885b4602748b03', label: 'Hunter X' },
+  { address: '0x0b00c540bc5f203d97ac87da62164d3d37e19798', label: 'Hunter XI' },
+];
+
+const HL_API = 'https://api.hyperliquid.xyz/info';
+let walletData = [];
+let sortMode = 'bias';
+let filterMode = 'all';
+let countdown = 30;
+
+function fmtAge2(ms) {
+  const s = Math.floor(ms / 1000);
+  if (s < 60)  return { val: `${s}s`, unit: 'ago', fresh: true };
+  const m = Math.floor(s / 60);
+  if (m < 60)  return { val: `${m}m`, unit: 'ago', fresh: m < 15 };
+  const h = Math.floor(m / 60);
+  if (h < 24)  return { val: `${h}h ${m%60}m`, unit: 'ago', fresh: false };
+  const d = Math.floor(h / 24);
+  return { val: `${d}d`, unit: 'ago', fresh: false };
+}
+
+function fmtPnl(n) {
+  const abs = Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (n >= 0 ? '+$' : '-$') + abs;
+}
+
+function fmtPrice(n) {
+  if (n === 0) return '—';
+  return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: n > 1 ? 2 : 6 });
+}
+
+function fmtSize(n, coin) {
+  return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) + ' ' + coin;
+}
+
+function shortAddr(a) { return `${a.slice(0,6)}···${a.slice(-4)}`; }
+
+async function fetchWallet(wallet) {
+  try {
+    const [stateRes, fillsRes] = await Promise.all([
+      fetch(HL_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'clearinghouseState', user: wallet.address })
+      }),
+      fetch(HL_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'userFills', user: wallet.address })
+      })
+    ]);
+
+    const state = await stateRes.json();
+    const fills = await fillsRes.json();
+    const assetPositions = state?.assetPositions ?? [];
+    const positions = [];
+
+    for (const ap of assetPositions) {
+      const pos = ap?.position;
+      if (!pos) continue;
+      const szi = parseFloat(pos.szi ?? 0);
+      if (szi === 0) continue;
+
+      const coin  = pos.coin ?? '?';
+      const isLong = szi > 0;
+      const absSize = Math.abs(szi);
+      const entryPx = parseFloat(pos.entryPx ?? 0);
+      const unrealizedPnl = parseFloat(pos.unrealizedPnl ?? 0);
+      const leverage = pos.leverage?.value ?? pos.leverage ?? '?';
+
+      let entryTime = null;
+      if (Array.isArray(fills)) {
+        const matching = fills.filter(f =>
+          f.coin === coin &&
+          ((isLong && f.side === 'B') || (!isLong && f.side === 'A'))
+        ).sort((a, b) => b.time - a.time);
+        if (matching.length > 0) entryTime = matching[0].time;
+      }
+
+      positions.push({ coin, isLong, absSize, entryPx, unrealizedPnl, leverage, entryTime });
+    }
+
+    const longs  = positions.filter(p => p.isLong).length;
+    const shorts = positions.filter(p => !p.isLong).length;
+    const netSide = longs > shorts ? 'bull' : shorts > longs ? 'bear' : 'neutral';
+    const totalPnl = positions.reduce((s, p) => s + p.unrealizedPnl, 0);
+
+    return { wallet, positions, netSide, totalPnl, error: null };
+  } catch (e) {
+    return { wallet, positions: [], netSide: 'neutral', totalPnl: 0, error: e.message };
+  }
+}
+
+function renderCard(wd, idx) {
+  const { wallet, positions, netSide, totalPnl, error } = wd;
+  const now = Date.now();
+
+  if (error) {
+    return `
+    <div class="wallet-card" style="animation-delay:${idx*0.03}s">
+      <div class="card-header">
+        <div class="wallet-id">
+          <div class="wallet-num">${['I','II','III','IV','V','VI','VII','VIII','IX','X','XI'][idx]||idx+1}</div>
+          <div>
+            <div class="wallet-name">${wallet.label}</div>
+            <div class="wallet-addr">${shortAddr(wallet.address)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="error-card">
+        <div style="font-size:26px;opacity:0.3;">🕷</div>
+        <div class="error-msg">Open via local server to fetch live data<br><span style="color:#2a1838;font-size:9px;">(CORS blocks direct browser access)</span></div>
+      </div>
+    </div>`;
+  }
+
+  const badgeClass = netSide === 'bull' ? 'bull' : netSide === 'bear' ? 'bear' : 'neutral';
+  const badgeText  = netSide === 'bull' ? '🩸 LONG' : netSide === 'bear' ? '🔮 SHORT' : '⚰ DORMANT';
+  const roman = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI'][idx] || idx+1;
+
+  let posHtml = '';
+  if (positions.length === 0) {
+    posHtml = `<div class="no-pos">⚰ &nbsp; DORMANT — NO OPEN POSITIONS</div>`;
+  } else {
+    posHtml = positions.map(p => {
+      const pnlClass = p.unrealizedPnl >= 0 ? 'green' : 'red';
+      const pnlStr   = fmtPnl(p.unrealizedPnl);
+      const sideIcon = p.isLong ? '🩸' : '🔮';
+      const rowClass = p.isLong ? 'long' : 'short';
+
+      let ageHtml = '';
+      if (p.entryTime) {
+        const age = fmtAge2(now - p.entryTime);
+        const ageColor = age.fresh ? 'var(--crimson)' : 'var(--muted)';
+        const ageIcon  = age.fresh ? '🕯' : '⏳';
+        ageHtml = `<span class="pos-age" style="color:${ageColor}">${ageIcon} ${age.val} ${age.unit}</span>`;
+      } else {
+        ageHtml = `<span class="pos-age">🕯 age unknown</span>`;
+      }
+
+      return `
+      <div class="pos-row ${rowClass}">
+        <div class="pos-side-icon">${sideIcon}</div>
+        <div class="pos-coin">${p.coin}</div>
+        <div class="pos-meta">
+          <span class="pos-size">${fmtSize(p.absSize, p.coin)}</span>
+          ${ageHtml}
+        </div>
+        <div class="pos-entry">
+          <span class="pos-entry-val">${fmtPrice(p.entryPx)}</span>
+          <span class="pos-entry-label">entry · ×${p.leverage}</span>
+        </div>
+        <div class="pos-pnl">
+          <span class="pos-pnl-val ${pnlClass}">${pnlStr}</span>
+          <span class="pos-lev">×${p.leverage}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  const totalPnlClass = totalPnl >= 0 ? 'green' : 'red';
+
+  return `
+  <div class="wallet-card ${badgeClass}" style="animation-delay:${idx*0.03}s">
+    <div class="card-header">
+      <div class="wallet-id">
+        <div class="wallet-num">${roman}</div>
+        <div>
+          <div class="wallet-name">${wallet.label}</div>
+          <div class="wallet-addr" title="${wallet.address}" onclick="navigator.clipboard?.writeText('${wallet.address}')">${shortAddr(wallet.address)}</div>
+        </div>
+      </div>
+      <div class="side-badge ${badgeClass}">${badgeText}</div>
+    </div>
+    <div class="positions-list">${posHtml}</div>
+    ${positions.length > 0 ? `
+    <div class="card-footer">
+      <div class="total-pnl">
+        <span class="total-pnl-label">Blood Money</span>
+        <span class="total-pnl-val ${totalPnlClass}">${fmtPnl(totalPnl)}</span>
+      </div>
+      <a class="hl-link" href="https://app.hyperliquid.xyz/portfolio/${wallet.address}" target="_blank">
+        Hyperliquid ↗
+      </a>
+    </div>` : ''}
+  </div>`;
+}
+
+function renderGrid() {
+  let sorted = [...walletData];
+
+  if (sortMode === 'bias') {
+    const order = { bull: 0, bear: 1, neutral: 2 };
+    sorted.sort((a, b) => order[a.netSide] - order[b.netSide]);
+  } else if (sortMode === 'pnl') {
+    sorted.sort((a, b) => b.totalPnl - a.totalPnl);
+  } else if (sortMode === 'positions') {
+    sorted.sort((a, b) => b.positions.length - a.positions.length);
+  }
+
+  if (filterMode !== 'all') {
+    sorted = sorted.filter(w => w.netSide === filterMode);
+  }
+
+  document.getElementById('grid').innerHTML = sorted.map((wd, i) => renderCard(wd, i)).join('');
+}
+
+function updateStats() {
+  const bull  = walletData.filter(w => w.netSide === 'bull').length;
+  const bear  = walletData.filter(w => w.netSide === 'bear').length;
+  const neut  = walletData.filter(w => w.netSide === 'neutral').length;
+  const total = WALLETS.length;
+  const allPos = walletData.reduce((s, w) => s + w.positions.length, 0);
+  const allPnl = walletData.reduce((s, w) => s + w.totalPnl, 0);
+
+  document.getElementById('hBull').textContent = bull;
+  document.getElementById('hBear').textContent = bear;
+  document.getElementById('hPositions').textContent = allPos;
+
+  const pnlEl = document.getElementById('hTotalPnl');
+  pnlEl.textContent = fmtPnl(allPnl);
+  pnlEl.style.color = allPnl >= 0 ? 'var(--crimson)' : '#9b59ff';
+
+  const bullPct = (bull / total) * 100;
+  const bearPct = (bear / total) * 100;
+  document.getElementById('sentBull').style.width = bullPct + '%';
+  document.getElementById('sentBear').style.width = bearPct + '%';
+
+  document.getElementById('scBull').textContent    = `${bull} LONG`;
+  document.getElementById('scBear').textContent    = `${bear} SHORT`;
+  document.getElementById('scNeutral').textContent = `${neut} DORMANT`;
+}
+
+function showLoadingCards() {
+  document.getElementById('grid').innerHTML = WALLETS.map((w, i) => `
+    <div class="loading-card" style="animation-delay:${i*0.04}s">
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="skeleton" style="width:28px;height:28px;border-radius:4px;"></div>
+        <div style="flex:1;">
+          <div class="skeleton" style="height:12px;width:80px;margin-bottom:6px;"></div>
+          <div class="skeleton" style="height:10px;width:120px;"></div>
+        </div>
+        <div class="skeleton" style="height:24px;width:72px;border-radius:3px;"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:16px;">
+        <div class="skeleton" style="height:46px;border-radius:4px;"></div>
+        <div class="skeleton" style="height:46px;border-radius:4px;opacity:0.5;"></div>
+      </div>
+    </div>`).join('');
+}
+
+async function fetchAll() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  btn.disabled = true;
+  document.getElementById('lastUpdate').textContent = 'Draining data...';
+
+  walletData = await Promise.all(WALLETS.map(w => fetchWallet(w)));
+
+  updateStats();
+  renderGrid();
+
+  const now = new Date();
+  document.getElementById('lastUpdate').textContent =
+    `Awakened ${now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+
+  btn.classList.remove('spinning');
+  btn.disabled = false;
+  countdown = 30;
+}
+
+function setSort(mode) {
+  sortMode = mode;
+  document.querySelectorAll('[id^="sort"]').forEach(b => b.classList.remove('active'));
+  const key = 'sort' + mode.charAt(0).toUpperCase() + mode.slice(1);
+  document.getElementById(key)?.classList.add('active');
+  renderGrid();
+}
+
+function setFilter(mode) {
+  filterMode = mode;
+  document.querySelectorAll('[id^="filter"]').forEach(b => b.classList.remove('active'));
+  const key = 'filter' + mode.charAt(0).toUpperCase() + mode.slice(1);
+  document.getElementById(key)?.classList.add('active');
+  renderGrid();
+}
+
+setInterval(() => {
+  countdown--;
+  document.getElementById('nextRefresh').textContent = countdown + 's';
+  if (countdown <= 0) fetchAll();
+}, 1000);
+
+setInterval(() => {
+  if (walletData.length > 0) renderGrid();
+}, 10000);
+
+showLoadingCards();
+fetchAll();
+</script>
+</body>
+</html>
