@@ -6,7 +6,7 @@ const path = require('path');
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 const app = express();
 
-// Serve HTML file
+const htmlPath = path.join(__dirname, 'index.html');
 app.get('/', (req, res) => {
   const htmlPath = path.join(__dirname, 'whale-hunter-coffin-cabal (1).html');
   res.sendFile(htmlPath);
