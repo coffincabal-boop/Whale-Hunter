@@ -22,7 +22,7 @@ client.once('ready', () => {
   console.log(`✅ Bot logged in as ${client.user.tag}`);
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.MTQ5NjQzNTQ4ODE2NzQyODIwMA.GA257Q.94jtujNQaJI6WflFgZl_ZRk55-wjniQy01CDzk);
 
 // Start web server
 const PORT = process.env.PORT || 3000;
